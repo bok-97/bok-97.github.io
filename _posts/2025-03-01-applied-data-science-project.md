@@ -96,7 +96,6 @@ tfidf_df.head()
 cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 ````
 
-
 #### Further Data preparation for Collaborative Filtering Recommendation System
 
 
