@@ -4,7 +4,7 @@ author: Chia Hoi BOK
 title: "Product Recommendation System for Sephora Online Store"
 categories: ITD214
 ---
-## Project Background
+# Project Background
 This work is a part of a group project module from Nanyang Polytechnic Singapore's *Specialist Diploma in Business & Big Data Analytics*.
 
 #### Project Details
