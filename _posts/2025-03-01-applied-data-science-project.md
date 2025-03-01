@@ -243,14 +243,107 @@ svd_1 = validate_model(model, surprise_data)
 print(svd_1)
 ````
 <img width="559" alt="image" src="https://github.com/user-attachments/assets/d2cbbd55-37e4-46a6-8698-9df1c4d2dd6f" />
+
 1. RMSE (Root Mean Square Error): Measures how far the predicted ratings are from actual ratings. Lower RMSE is better (closer to zero means better accuracy).
 - RMSE = 0.9192 (model's average predicted ratings are about 0.95 stars away from actual ratings)
+
 2. MAE (Mean Absolute Error): Measures the average absolute difference between predicted and actual ratings. Similary, lower is better. MAE does not penalize large errors as much as RMSE does.
 - Mean MAE = 0.6598 (predicted ratings are on average off by 0.66 stars)
+
 3. FCP (Fraction of Concordant Pairs): Measures how well the model ranks items. Higher FCP is better (closer to 1 means better ranking).
 - Mean FCP = 0.5140 (in 51% of cases, the model correctly ranked higher-rated items above lower-rated ones). FCP is slightly better than random (0.5), but there's room for improvement.
 
 ### SVD Model Hyperparameter Tuning
+We will now attempt to do hyperparameter tuning for the SVD model to find out the optimal parameter values for the model. We will be comparing the performance between GridSearchCV and RandomizedSearchCV methods and select one that will produce lower RMSE.
+1. Importing built-in surprise functions
+````html
+from surprise import accuracy
+from surprise.model_selection.validation import cross_validate
+from surprise.dataset import Dataset
+from surprise.reader import Reader
+from surprise import SVD
+from surprise import KNNBasic
+from surprise import KNNWithMeans
+from surprise.model_selection import GridSearchCV
+from surprise.model_selection import RandomizedSearchCV
+
+reader = Reader()
+surprise_data = Dataset.load_from_df(filtered_data[['author_id', 'product_id', 'rating']], reader)
+````
+2. Defining parameter grid for GridSearchCV and RandomizedSearchCV
+````html
+# Define parameter grid for GridSearchCV and RandomizedSearchCV
+param_grid = {
+    'n_factors': [10, 20, 50, 100], # number of latent features to represent users and items in a lower-dimensional space
+    'n_epochs': [5, 10, 20], # number of iterations for training
+    'lr_all': [0.002, 0.005, 0.01], # learning rate for all parameters, how much model updates weights/iteration
+    'reg_all': [0.02, 0.1, 0.3]  # regularization strength to prevent overfitting, reduces model complexity but may cause underfitting
+}
+````
+3. Fitting both GridSearchCV and RandomizedSearchCV to dataset
+````html
+# GridSearchCV: Exhaustive search for best parameters
+grid_search = GridSearchCV(SVD, param_grid, measures=['rmse'], cv=3)
+grid_search.fit(surprise_data)
+
+# RandomizedSearchCV: Random sampling from parameter grid
+random_search = RandomizedSearchCV(SVD, param_grid, n_iter=10, measures=['rmse'], cv=3, random_state=42)
+random_search.fit(surprise_data)
+````
+4. Calculate RMSE for both searches, compare and outputs the tuned hyperparameters
+````html
+# Get RMSE from both searches
+grid_rmse = grid_search.best_score['rmse']
+random_rmse = random_search.best_score['rmse']
+
+# Compare RMSEs and select the best model
+if grid_rmse < random_rmse:
+    print(f"GridSearchCV gives the best model with RMSE: {grid_rmse}")
+    best_model = grid_search.best_estimator['rmse']
+    best_params = grid_search.best_params
+else:
+    print(f"RandomizedSearchCV gives the best model with RMSE: {random_rmse}")
+    best_model = random_search.best_estimator['rmse']
+    best_params = random_search.best_params
+
+# Output the tuned hyperparameters
+print("Tuned hyperparameters:")
+for param, value in best_params.items():
+    print(f"{param}: {value}")
+````
+The output from the above is:
+<img width="353" alt="image" src="https://github.com/user-attachments/assets/bd96c2f3-087d-4b8c-b202-30cb4b3b8018" />
+
+5. Fine-tuning SVD model with obtained parameter values and fitting it
+````html
+final_model = SVD(n_factors=100, 
+                  n_epochs=20, 
+                  lr_all=0.01, 
+                  reg_all=0.1)
+
+# Fit the final model on the entire trainset
+final_model.fit(trainset)
+````
+6. Evaluating the tuned-SVD model using cross validation
+````html
+def validate_model_after_training(model, data):
+    """Validate the trained model with cross-validation and return the results."""
+    results = cross_validate(model, data, measures=['RMSE', 'MAE', 'FCP'], cv=10, verbose=True)  # 10-fold cross-validation
+    return pd.DataFrame.from_dict(results).mean(axis=0)
+
+# Validate the trained model
+print("Validating the trained model with cross-validation...")
+cv_results = validate_model_after_training(final_model, surprise_data)
+
+print("Cross-validation results after training:")
+print(cv_results)
+
+# **Final Evaluation on the Testset**
+predictions = final_model.test(testset)
+final_rmse = accuracy.rmse(predictions)
+print(f"Final RMSE after retraining: {final_rmse}")
+````
+Output:
 
 
 ## Recommendation and Analysis
