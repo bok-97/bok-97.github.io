@@ -23,11 +23,29 @@ In this work, we will be developing two types of recommendation systems:
 1. Content-Based Recommender System; recommend based on product similarity/cosine-similarity
 2. Collaborative Filtering Recommender System; recommend based on user preference/rating hisotry
 
+### About Dataset
+This work utilizes the Sephora Products and Skincare Reviews datasets provided by Nady Inky on Kaggle, it contains:
+● information about all beauty products (over 8,000) from the Sephora online store, including product and brand names, prices, ingredients, ratings, and all features.
+ ● user reviews (about 1 million on over 2,000 products) of all products from the Skincare category, including user appearances, and review ratings by other users.
+
 ## Work Accomplished
-Document your work done to accomplish the outcome
 
 ### Data Preparation
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
+#### Data Import & Understanding
+
+
+#### Further Data preparation for Content-Based Recommendation System
+1. Create products1 dataframe that includes only product-centric variables
+![image](https://github.com/user-attachments/assets/2f3a4001-bda0-4ebf-ab94-d6ff1cdee493)
+2. Clean products1 using similar approach (drop_duplicates(), dropna(), reset_index())
+![image](https://github.com/user-attachments/assets/f7aa7751-8c26-44bf-8d96-3571e12881e2)
+3. Create mapping for product_id  & products1 index to enable fast loopkup by product_id
+![image](https://github.com/user-attachments/assets/910aeb3b-4fbe-4bc1-a608-417e340f8657)
+
+
+#### Further Data preparation for Collaborative Filtering Recommendation System
+
+
 
 ### Modelling
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
