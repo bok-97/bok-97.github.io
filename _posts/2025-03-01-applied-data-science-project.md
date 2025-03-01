@@ -30,10 +30,177 @@ This work utilizes the Sephora Products and Skincare Reviews datasets provided b
 - information about all beauty products (over 8,000) from the Sephora online store, including product and brand names, prices, ingredients, ratings, and all features.
 - user reviews (about 1 million on over 2,000 products) of all products from the Skincare category, including user appearances, and review ratings by other users.
 
+1. Product Information in product_info.csv file
+- product_id: The unique identifier for each product.
+- product_name: The name of the product.
+- brand_id: The unique identifier for each brand.
+- brand_name: The name of the brand.
+- loves_count: The number of "loves" each product has received from users.
+- rating: The average rating for the product.
+- reviews: The number of reviews the product has.
+- size: The size of the product in oz/ml.
+- variation_type: The type of variation, if any, for the product.
+- variation_value: The value of the variation, if any, for the product.
+- variation_desc: The description of the variation, if any, for the product.
+- ingredients: The ingredients of the product.
+- price_usd: The price of the product in USD.
+- value_price_usd: The value price of the product in USD.
+- sale_price_usd: The sale price of the product in USD.
+- limited_edition: Boolean value indicating whether the product is a limited edition.
+- new: Boolean value indicating whether the product is new.
+- online_only: Boolean value indicating whether the product is available online only.
+- out_of_stock: Boolean value indicating whether the product is out of stock.
+- sephora_exclusive: Boolean value indicating whether the product is exclusive to Sephora.
+- highlights: The highlights of the product.
+- primary_category: The primary category of the product.
+- secondary_category: The secondary category of the product.
+- tertiary_category: The tertiary category of the product.
+- child_count: The number of child products, if any.
+- child_max_price: The maximum price among child products, if any.
+- child_min_price: The minimum price among child products, if any.
+
+2. Customer Reviews in reviews_0_250.csv to reviews_1500_end.csv files
+- author_id: Unique identifier for each author(user).
+- rating: The rating given by the user for that product.
+- is_recommended: Boolean value indicating whether the user would recommend the product.
+- helpfulness: Indicator of how helpful other users found the review.
+- total_feedback_count: The total feedback count for the review.
+- total_neg_feedback_count: The total count of negative feedback for the review.
+- total_pos_feedback_count: The total count of positive feedback for the review.
+- submission_time: The date the review was submitted.
+- review_text: The text of the review.
+- review_title: The title of the review.
+- skin_tone: The skin tone of the user.
+- eye_color: The eye color of the user.
+- skin_type: The skin type of the user.
+- hair_color: The hair color of the user.
+- product_id: Unique identifier for each product.
+- product_name: The name of the product.
+- brand_name: The name of the brand.
+- price_usd: The price of the product in USD when the review was written.
+
 ## Work Accomplished
 
-### Data Preparation
+### Data Preparation and Cleaning
 #### Data Import & Understanding
+1. Importing necessary libraries
+````html
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+import ipywidgets as widgets
+from IPython.display import display
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+#from surprise import Dataset, Reader, SVD
+#from surprise.model_selection import cross_validate
+````
+2. Importing datafiles as product and review, checking .info() and head() for data understanding
+````html
+# Load product datafile
+product = pd.read_csv("product_info.csv")
+product.info()
+product.head()
+# renaming rating column
+product = product.rename(columns={'rating': 'ave_rating'})
+
+# Load review datafiles and concatenate
+df1 = pd.read_csv("reviews_0-250.csv", low_memory=False)
+df2 = pd.read_csv("reviews_250-500.csv", low_memory=False)
+df3 = pd.read_csv("reviews_500-750.csv", low_memory=False)
+df4 = pd.read_csv("reviews_750-1250.csv", low_memory=False)
+df5 = pd.read_csv("reviews_1250-end.csv", low_memory=False)
+review = pd.concat([df1,df2,df3,df4,df5])
+review.info()
+review.head()
+````
+3. Checking for data summary
+````html
+def data_summary(df, name):
+    print(f"\033[1m\n{name} Data Summary\033[0m")
+    print("Rows     :", df.shape[0])
+    print("Columns  :", df.shape[1])
+    print("\nFeatures :\n", df.columns.tolist())
+    print("\nMissing values : ", df.isnull().sum().values.sum())
+    print("\nUnique values :\n", df.nunique())
+
+data_summary(product, "Product")
+data_summary(review, "Review")
+````
+4. Selecting only necessary columns for recommendation systems
+````html
+# Select only necessary columns for recommendation system
+product_df = product[['product_id', 'product_name', 'brand_name', 'primary_category', 'secondary_category', 'tertiary_category','highlights']]
+review_df = review[['author_id', 'product_id', 'rating', 'review_text', 'skin_tone', 'eye_color', 'skin_type', 'hair_color']]
+````
+5. Merging datasets by key column 'product_id'
+````
+# Merge datasets on 'product_id'
+data = review_df.merge(product_df, on='product_id', how='left')
+data.head().transpose()
+````
+6. Dropping columns with excessive missing values (more than 80%)
+````
+data1 = data.dropna(thresh=len(data) * 0.80, axis=1)
+````
+7. Filling missing 'rating' values by product mean
+```
+data['rating'] = data.groupby('product_id')['rating'].transform(lambda x: x.fillna(x.mean()))
+```
+8. Dropping missing values from other columns (<20% of total values)
+````
+data = data.dropna()
+````
+9. Dropping duplicates from all columns
+````
+data = data.drop_duplicates()
+````
+10. Resetting the index of the DataFrame to overwrite old index
+````
+data = data.reset_index(drop=True)
+````
+
+#### Basic Exploratory Data Analysis (EDA) of data dataframe
+1. Checking simple statistics of numeric variables (ie. ratings). Rating : This is can be considered as categorical attribute with values of 1,2,3,4,5. The mean rating is 4.3 which means most of the users have given very good ratings (>4).
+````
+data.describe().round(2).transpose()
+````
+2. Data (distribution) visualisation through ipywidget (dropdown)
+````
+column_dropdown = widgets.Dropdown(
+    options=['rating', 'skin_tone', 'eye_color', 'skin_type', 'hair_color', 
+             'primary_category', 'secondary_category', 'tertiary_category'],
+    value='rating',  # Default selection
+    description='Feature:',
+    style={'description_width': 'initial'}
+)
+
+# Function to plot the selected feature distribution
+def plot_distribution(feature):
+    plt.figure(figsize=(10, 5))
+    
+    if data[feature].dtype == 'object':  # Categorical Features
+        counts = data[feature].value_counts()
+        plt.barh(counts.index, counts.values, color='skyblue')
+        plt.xlabel("Count")
+        plt.ylabel(feature)
+        plt.title(f"Distribution of {feature}")
+    else:  # Numeric Feature (ave_rating)
+        plt.hist(data[feature], bins=10, color='blue', edgecolor='black', alpha=0.7)
+        plt.xlabel(feature)
+        plt.ylabel("Frequency")
+        plt.title(f"Distribution of {feature}")
+
+    plt.grid(axis='x', linestyle='--', alpha=0.7)
+    plt.show()
+
+# Interactive output
+widgets.interactive(plot_distribution, feature=column_dropdown)
+````
+Sample output of 'rating' dropdown selection:
+
+![image](https://github.com/user-attachments/assets/789a3088-8924-4c15-9072-d23e56907356)
 
 
 #### Further Data preparation for Content-Based Recommendation System
