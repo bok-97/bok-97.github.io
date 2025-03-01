@@ -17,7 +17,7 @@ This workbook is Part 3 of of the group project, titled **Product Recommendation
 
 ![image](https://github.com/user-attachments/assets/b09ad82b-ccdc-4bb6-8f97-c261de77efb9)
 
-    A recommendation system is an AI-driven tool that analyzes user behavior and preferences to suggest relevant products, services, or content. It uses techniques like collaborative filtering, content-based filtering, and hybrid approaches to provide personalized recommendations. These systems are widely used in e-commerce, streaming platforms, and online services to enhance user experience and engagement.
+  A recommendation system is an AI-driven tool that analyzes user behavior and preferences to suggest relevant products, services, or content. It uses techniques like collaborative filtering, content-based filtering, and hybrid approaches to provide personalized recommendations. These systems are widely used in e-commerce, streaming platforms, and online services to enhance user experience and engagement.
 
 In this work, we will be developing two types of recommendation systems:
 1. Content-Based Recommender System; recommend based on product similarity/cosine-similarity
@@ -30,7 +30,7 @@ This work utilizes the Sephora Products and Skincare Reviews datasets provided b
 - information about all beauty products (over 8,000) from the Sephora online store, including product and brand names, prices, ingredients, ratings, and all features.
 - user reviews (about 1 million on over 2,000 products) of all products from the Skincare category, including user appearances, and review ratings by other users.
 
-1. Product Information in product_info.csv file
+1. **Product Information** in product_info.csv file
 - product_id: The unique identifier for each product.
 - product_name: The name of the product.
 - brand_id: The unique identifier for each brand.
@@ -59,7 +59,7 @@ This work utilizes the Sephora Products and Skincare Reviews datasets provided b
 - child_max_price: The maximum price among child products, if any.
 - child_min_price: The minimum price among child products, if any.
 
-2. Customer Reviews in reviews_0_250.csv to reviews_1500_end.csv files
+2. **Customer Reviews** in reviews_0_250.csv to reviews_1500_end.csv files
 - author_id: Unique identifier for each author(user).
 - rating: The rating given by the user for that product.
 - is_recommended: Boolean value indicating whether the user would recommend the product.
@@ -79,9 +79,9 @@ This work utilizes the Sephora Products and Skincare Reviews datasets provided b
 - brand_name: The name of the brand.
 - price_usd: The price of the product in USD when the review was written.
 
-## Work Accomplished
+# II. Work Accomplished
 
-### Data Preparation and Cleaning
+## Data Preparation
 #### Data Import & Understanding
 1. Importing necessary libraries
 ````html
@@ -128,6 +128,7 @@ def data_summary(df, name):
 data_summary(product, "Product")
 data_summary(review, "Review")
 ````
+#### Data Preprocessing and Cleaning
 4. Selecting only necessary columns for recommendation systems
 ````html
 # Select only necessary columns for recommendation system
@@ -203,10 +204,8 @@ Sample output of 'rating' dropdown selection:
 ![image](https://github.com/user-attachments/assets/789a3088-8924-4c15-9072-d23e56907356)
 
 
-#### Further Data preparation for Content-Based Recommendation System
-A content-based recommendation system recommends items to the users that are relevant to the preferred features of other items.
-
-For example, if a user often searches or browses for ‘black dress’ on a shopping e-platform, a content-based recommendation system will recommend the user other dresses of the same colour.
+#### Further Data preparation for *Content-Based Recommendation System*
+  A content-based recommendation system recommends items to the users that are relevant to the preferred features of other items. For example, if a user often searches or browses for ‘black dress’ on a shopping e-platform, a content-based recommendation system will recommend the user other dresses of the same colour.
 In this section we will compute the pairwise similarity score of all products based on their features and recommend products accordingly. The features are in the highlights column of our dataset.
 
 The similarity between two products can be calculated by measuring the cosine of the angle between two vectors in a matrix. To calculate it, the text strings (our highlights lists) is converted to word vectors in a matrix. Then, the angle between vectors is calculated and a score from 0 to 1 is generated. Values closer to 0 show low similarity and values closer to 1 show high similarity.
@@ -265,8 +264,8 @@ tfidf_df.head()
 cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 ````
 
-#### Further Data preparation for Collaborative Filtering Recommendation System
-A collaborative recommendation system predicts user preferences by leveraging past interactions and preferences of similar users, typically through collaborative filtering techniques such as user-based or item-based approaches. These systems focus on identifying patterns in user behavior to suggest items, relying on the assumption that users who agreed in the past will agree in the future (Ricci, F., Rokach, L., & Shapira, B., 2015).
+#### Further Data preparation for *Collaborative Filtering Recommendation System*
+  A collaborative recommendation system predicts user preferences by leveraging past interactions and preferences of similar users, typically through collaborative filtering techniques such as user-based or item-based approaches. These systems focus on identifying patterns in user behavior to suggest items, relying on the assumption that users who agreed in the past will agree in the future (Ricci, F., Rokach, L., & Shapira, B., 2015).
 
 Example: If User A and User B have rated many movies similarly, and User B gives a high rating to a movie that User A hasn’t seen, we can recommend that movie to User A. Since User B rated Movie 3 as 5, we can predict that User A might like Movie 3 as well.
 User              | Movie 1           | Movie 2           | Movie 3          | Movie 4
@@ -281,7 +280,7 @@ Collaborative filtering systems work in 5 simple steps:
 4. Predict Ratings/Preferences – Estimate a user’s interest in an item by analyzing ratings from similar users or items.
 5. Recommend Top Items – Suggest the highest predicted items that the user hasn’t interacted with yet.
 
-Making Predictions using Surprise library:
+Making Predictions using SURPRISE library:
 Surprise is a popular library for building and analyzing recommendation systems, as it provides various ready-to-use algorithms and tools to evaluate and compare the performance of these algorithms. Surprise automates similarity calculations and matrix factorization (e.g., SVD), making it more efficient than manually computing similarities!
 
 1. Importing important libraries
@@ -335,9 +334,9 @@ surprise_data = Dataset.load_from_df(filtered_data[['author_id', 'product_id', '
 trainset, testset = train_test_split(surprise_data, test_size=0.2,random_state=5)
 ````
 
-### Modelling
+# Modelling
 
-#### 1. Content-based Recommendation System
+## 1. Content-based Recommendation System
 A function get_recommendation() is created to call the top 5 similar products to the user-input product_id.
 ````html
 # Recommendation Function
@@ -367,9 +366,9 @@ Example of inputting a fragrance product (P473671), the top 5 recommendations ar
 
 <img width="323" alt="image" src="https://github.com/user-attachments/assets/51971efc-c46b-4d20-921c-de1859722cc7" />
 
-#### 2. Collaborative Filtering Recommendation System
+## 2. Collaborative Filtering Recommendation System
 
-##### 2.1 SVD Matrix Factorization Algorithm
+#### 2.1 SVD Matrix Factorization Algorithm
 Singular Value Decomposition (SVD):
 - A matrix factorization technique that decomposes a given matrix into a set of matrices.
 - Reduces the dimensionality of user-item interaction matrices and generates latent factors for both users and items that can then be used to predict user preferences for items and provide personalized recommendations.
@@ -391,8 +390,8 @@ The aobve returns a list of prediction objects used by the surprise library to s
 - est (float) The estimated rating r_ui
 - details (dict) – Stores additional details about the prediction that might be useful for later analsis.
 
-### Evaluation 
-Evaluation of untuned SVD model:
+# Model Evaluation 
+#### Evaluation of untuned SVD model:
 ````html
 # Evaluate model accuracy by built-in RMSE Metric in SURPRISE
 mse = accuracy.mse(predictions)
@@ -421,9 +420,49 @@ print(svd_1)
 - Mean FCP = 0.5140 (in 51% of cases, the model correctly ranked higher-rated items above lower-rated ones). FCP is slightly better than random (0.5), but there's room for improvement.
 
 #### Untuned SVD Model Application
+Defining a function to recommend top n products based on user input product_id:
+````
+# Function to Recommend Top-N Products for a User; N = 5
+def get_top_n_recommendations(model, user_id, n=5):
+    """Recommend top N products for a given user."""
+    # Get all product IDs
+    all_product_ids = filtered_data['product_id'].unique()
+    
+    # Remove products user has already rated
+    rated_products = filtered_data[filtered_data['author_id'] == user_id]['product_id'].values
+    unrated_products = [pid for pid in all_product_ids if pid not in rated_products]
+    
+    # Predict ratings for unrated products
+    predictions = [model.predict(user_id, pid) for pid in unrated_products]
+    
+    # Sort by predicted rating
+    predictions.sort(key=lambda x: x.est, reverse=True)
+    
+    # Get top-N recommendations
+    top_n = predictions[:n]
+
+    # Convert to DataFrame for table output
+    df = pd.DataFrame([(pred.iid, pred.est) for pred in top_n], columns=["Product ID", "Predicted Rating"])
+    df.index += 1  # Start index from 1 for better readability
+    
+    return [(pred.iid, pred.est) for pred in top_n]
+
+# Take user input for user_id
+user_id = input("Enter User ID: ")
 
 
-### SVD Model Hyperparameter Tuning
+try:
+    user_id = int(user_id)  # Convert input to integer if needed
+    recommendations_df = get_top_n_recommendations(model, user_id, n=5)
+    print(recommendations_df)  # Display recommendations in table format
+except ValueError:
+    print("Invalid User ID. Please enter a numeric value.")
+````
+Sample outcome of user input '5182718480':
+
+<img width="566" alt="image" src="https://github.com/user-attachments/assets/945f78d1-942b-4444-9cc4-c368d698bbce" />
+
+#### SVD Model Hyperparameter Tuning
 We will now attempt to do hyperparameter tuning for the SVD model to find out the optimal parameter values for the model. We will be comparing the performance between GridSearchCV and RandomizedSearchCV methods and select one that will produce lower RMSE.
 1. Importing built-in surprise functions
 ````html
@@ -560,7 +599,7 @@ except ValueError:
 
 <img width="571" alt="image" src="https://github.com/user-attachments/assets/f628350c-4d0a-4401-962c-0469a059eb2f" />
 
-We find out that, for the same author_id, the same top 5 products were recommended. Plotting a side-by-side bar chart of the metric scores comparison between the untuned and tuned SVD model, it explains why both models are giving the same outcome.
+  We find out that, for the same author_id, the same top 5 products were recommended. Plotting a side-by-side bar chart of the metric scores comparison between the untuned and tuned SVD model, it explains why both models are giving the same outcome.
 ````html
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -586,7 +625,7 @@ plt.show()
 <img width="573" alt="image" src="https://github.com/user-attachments/assets/79680647-cb30-4ab6-82cf-b1a46f7f33e0" />
 
 #### Other Built-in Algorithms in SURPRISE Library
-The surprise library also offers other algorithms that supports recommendation system models. A few of them are explored and compared with in terms of RMSE performance here.
+  The surprise library also offers other algorithms that supports recommendation system models. A few of them are explored and compared with in terms of RMSE performance here.
 
 1. Importing other algorithms and defining function to iterate cross validation on the dataset  
 ````html
@@ -645,12 +684,12 @@ Outcome is shown below. It can be seen that SVDpp and SVD models have the least 
 <img width="529" alt="image" src="https://github.com/user-attachments/assets/8fef16a8-fcac-44d1-8e82-18690f9375c3" />
 
 
-## Recommendation and Analysis
+# Recommendation and Analysis
 
-Recommender systems are algorithms aimed at suggesting relevant items to users (items being movies to watch, text to read, products to buy or anything else depending on industries). Recommender systems are really critical in some industries as they can generate a huge amount of income when they are efficient or also be a way to stand out significantly from competitors.
+  Recommender systems are algorithms aimed at suggesting relevant items to users (items being movies to watch, text to read, products to buy or anything else depending on industries). Recommender systems are really critical in some industries as they can generate a huge amount of income when they are efficient or also be a way to stand out significantly from competitors.
 
 We have achieved the business objective of building a recommendation system for users of Sephora products.
-We have used 2 different types here:
+We have used 2 different types in this work:
 
 1. Content-Based Recommender System; recommend based on product similarity/cosine-similarity
 2. Collaborative Filtering Recommender System; recommend based on user preference/rating hisotry
@@ -658,7 +697,7 @@ The best model used recommended is **SVD-based** algorithm where it had acheived
 
 Model optimzation was also attempted by **tuning the hyperparameters of SVD through GridSearchCV** before applying fitting the optimized parameters (epochs, learning rates, etc) to the dataset for training and testing.
 
-### Recommendation for Further Optimization
+# Recommendation for Further Optimization
 Surprise models rely on the training data. If a user was removed before training, the model never saw them, so it does not have their preferences and no past ratings to base predictions on. This is known as Cold Start Problem (New or Unseen Users).
 
 1. Keep Low-Activity Users in Training Instead of removing them completely, keep them but apply different weights (e.g., give more weight to active users).
@@ -667,7 +706,7 @@ Surprise models rely on the training data. If a user was removed before training
 
 <img width="307" alt="image" src="https://github.com/user-attachments/assets/ac1bc278-0099-4e18-945a-86ea8c134687" />
 
-#### Hybrid Model (Combining Collaborative Filtering Model with Content-Based System)
+### Hybrid Model (Combining Collaborative Filtering Model with Content-Based System)
 ````html
 # Compute Product Similarity Based on Features
 feature_columns = ['skin_tone', 'eye_color', 'skin_type', 'hair_color']
@@ -713,14 +752,22 @@ user_id = 5442418082  # Example user
 print("Top 5 Hybrid Recommendations:", get_hybrid_recommendations(user_id, n=5))
 ````
 
-## AI Ethics
-Discuss the potential data science ethics issues (privacy, fairness, accuracy, accountability, transparency) in your project. 
+# AI Ethics Concerns and Risk Mitigation
+  Since the recommendation systems are widely used in user-interface platforms online, it has the risks of showing **biasness** when providing recommendations in the model. For example, If the system favors a particular gender, ethnicity, or skin type, it could lead to discriminatory recommendations.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
+This can be mitigated through privacy-first policies, fairness-aware algorithms, transparency, and user control. Ensuring an inclusive, unbiased, and accountable recommendation engine will enhance trust and user satisfaction. When training the model, we need to ensure there is sufficient diverse data representation, as well as excluding the protected or discriminatory features. For instance, user data as gender and ethnicity should not be used in the model if it irrelevant for generating generating recommendations.
 
-## Source Codes and Datasets
-Datasource files are too large to upload. 
-Datasource (kaggle): https://www.kaggle.com/datasets/nadyinky/sephora-products-and-skincare-reviews/data
+  One other major AI ethic is respecting user **data privacy**. In commercial e-platforms such as this, vast amounts of user data is stored. For example, collaborative filtering relies on user purchase history, clicks, and reviews. Storing and processing such data raises concerns about how much personal information is being collected. Hence, it is our legal and moral obligation to inform users of how you collect, store, access and use their data for the AI system. The data acquisition method must meet privacy regulations such as the General Data Protection Regulation (GDPR) and the Personal Data Protection Act (PDPA). 
 
-Github repo: https://github.com/bok-97/itd214_project_data
+# Source Codes, Datasets, and References
+- Datasource files are too large to upload. Datasource (kaggle): https://www.kaggle.com/datasets/nadyinky/sephora-products-and-skincare-reviews/data
+- Github repo: https://github.com/bok-97/itd214_project_data
+
+**References:**
+1. https://www.kaggle.com/code/chiahoibok/kit-2-b26e78/edit
+2. https://www.kaggle.com/code/rangarajansaranathan/collaborative-filtering-based-recommender-system#b.-Collaborative-Filtering-Recommender-Model-using-SURPRISE-Library
+3. https://joss.theoj.org/papers/10.21105/joss.02174.pdf
+4. https://surpriselib.com/
+![image](https://github.com/user-attachments/assets/cf541561-7a31-4040-b743-1fd424af55bd)
+
 
