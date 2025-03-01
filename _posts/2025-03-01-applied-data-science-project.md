@@ -1,4 +1,4 @@
----
+![image](https://github.com/user-attachments/assets/bbc1337f-f441-4630-9afc-8ce31f9c0fee)---
 layout: post
 author: Chia Hoi BOK
 title: "Product Recommendation System for Sephora Online Store"
@@ -25,8 +25,8 @@ In this work, we will be developing two types of recommendation systems:
 
 ### About Dataset
 This work utilizes the Sephora Products and Skincare Reviews datasets provided by Nady Inky on Kaggle, it contains:
-● information about all beauty products (over 8,000) from the Sephora online store, including product and brand names, prices, ingredients, ratings, and all features.
- ● user reviews (about 1 million on over 2,000 products) of all products from the Skincare category, including user appearances, and review ratings by other users.
+- information about all beauty products (over 8,000) from the Sephora online store, including product and brand names, prices, ingredients, ratings, and all features.
+- user reviews (about 1 million on over 2,000 products) of all products from the Skincare category, including user appearances, and review ratings by other users.
 
 ## Work Accomplished
 
@@ -48,11 +48,53 @@ products1 = pd.DataFrame(product, columns=[
     'product_id','product_name','highlights','primary_category', 'secondary_category', 'tertiary_category'])
 products1.head(5)
 products1.shape
-```
+````
 2. Clean products1 using similar approach (drop_duplicates(), dropna(), reset_index())
-![image](https://github.com/user-attachments/assets/f7aa7751-8c26-44bf-8d96-3571e12881e2)
+```html
+products1 = products1.drop_duplicates()
+products1 = products1.dropna()
+products1 = products1.reset_index(drop=True)
+products1.head()
+products1.isnull().sum()
+````
 3. Create mapping for product_id  & products1 index to enable fast loopkup by product_id
-![image](https://github.com/user-attachments/assets/910aeb3b-4fbe-4bc1-a608-417e340f8657)
+````html
+# Constructing a series from a dictionary with data indices and index product_name
+indices = pd.Series(products1.index, index=products1['product_id'])
+````
+4. Extract highlights and categories and convert to string
+````html
+# Extract highlights and categories and convert to string
+texts = (
+    products1['highlights'].astype(str) + " " +
+    products1['primary_category'].astype(str) + " " +
+    products1['secondary_category'].astype(str) + " " +
+    products1['tertiary_category'].astype(str)
+).values
+texts
+````
+5. Vectorize by TF-IDF for highlights and categories
+````html
+# TF-IDF Vectorizer for highlights and categories
+tfidf = TfidfVectorizer(stop_words='english')
+tfidf_matrix = tfidf.fit_transform(texts)
+tfidf_matrix.shape
+
+# Convert the TF-IDF matrix to a dense format and then into a DataFrame
+tfidf_dense = tfidf_matrix.toarray()
+
+# Create a DataFrame to display the TF-IDF values
+tfidf_df = pd.DataFrame(tfidf_dense, columns=tfidf.get_feature_names_out())
+
+# Display the first few rows
+tfidf_df.head()
+# 285 different words were used to describe 5484 products.
+````
+6. Compute cosine-similarity based on product
+````html
+# Content-based similarity using cosine similarity
+cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+````
 
 
 #### Further Data preparation for Collaborative Filtering Recommendation System
