@@ -112,7 +112,59 @@ Collaborative filtering systems work in 5 simple steps:
 4. Predict Ratings/Preferences – Estimate a user’s interest in an item by analyzing ratings from similar users or items.
 5. Recommend Top Items – Suggest the highest predicted items that the user hasn’t interacted with yet.
 
+Making Predictions using Surprise library:
+Surprise is a popular library for building and analyzing recommendation systems, as it provides various ready-to-use algorithms and tools to evaluate and compare the performance of these algorithms. Surprise automates similarity calculations and matrix factorization (e.g., SVD), making it more efficient than manually computing similarities!
 
+1. Importing important libraries
+````html
+from surprise import Dataset, Reader, SVD
+from surprise.model_selection import cross_validate
+from surprise.model_selection import train_test_split
+from surprise import accuracy
+````
+To load a surprise dataset from a pandas dataframe, we will use the load_from_df() method, we will also need a Reader object, and the rating_scale parameter must be specified. The dataframe must have three columns, corresponding to the **user ids, the item ids, and the ratings** in this order. Each row thus corresponds to a given rating.
+2. Removing products with low review counts (20% percentile)
+````html
+product_threshold = data['product_id'].value_counts().quantile(0.2)
+
+# Creating cut-off filter for less-reviewed products
+filtered_products = data['product_id'].value_counts()
+
+# Filters products with review counts > product_threshold (34 reviews)
+filtered_products = filtered_products[filtered_products > product_threshold].index
+print(filtered_products)
+# filtered_products filter will reduce product count from 1627 to 1297.
+````
+3. Removing authors with low review counts (80% percentile)
+````html
+author_threshold = data['author_id'].value_counts().quantile(0.8)
+
+# Creating cut-off filter for authors with less than 2 reviews
+filtered_authors = data['author_id'].value_counts()
+
+# Filtering authors with review counts > product_threshold (2)
+filtered_authors = filtered_authors[filtered_authors > author_threshold].index
+# filtered_authors filter will reduce author count from 324222 to 59893.
+````
+4. Apply the filtered_authors & filtered_products filters
+````html
+filtered_data = data[(data['product_id'].isin(filtered_products)) & 
+                     (data['author_id'].isin(filtered_authors))]
+````
+To load a surprise dataset from a pandas dataframe, we will use the load_from_df() method, we will also need a Reader object, and the rating_scale parameter must be specified.
+The dataframe must have three columns, corresponding to the author_id, the product_id, and the ratings in this order.
+5. Load the surprise dataset format
+````html
+# Surprise: Specifiess the minimum (1) and maximum (5) possible rating values in the dataset
+reader = Reader(rating_scale=(1,5))
+
+# Surprise: Loading from pandas dataframe to surpise dataset
+surprise_data = Dataset.load_from_df(filtered_data[['author_id', 'product_id', 'rating']], reader)
+````
+6. Split into train and test sets (80:20 ratio)
+````html
+trainset, testset = train_test_split(surprise_data, test_size=0.2,random_state=5)
+````
 
 ### Modelling
 <img width="190" alt="image" src="https://github.com/user-attachments/assets/bcc42eea-9849-42ce-a897-81995d9e0ace" />
@@ -144,6 +196,7 @@ user_product_id = input("Please enter the product code: ")
 print(get_recommendations(user_product_id))
 ````
 Example of inputting a fragrance product (P473671), the top 5 recommendations are also fragrance products:
+
 <img width="323" alt="image" src="https://github.com/user-attachments/assets/51971efc-c46b-4d20-921c-de1859722cc7" />
 
 #### 2. Collaborative Filtering Recommendation System
