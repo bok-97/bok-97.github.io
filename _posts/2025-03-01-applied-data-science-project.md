@@ -35,8 +35,20 @@ This work utilizes the Sephora Products and Skincare Reviews datasets provided b
 
 
 #### Further Data preparation for Content-Based Recommendation System
+A content-based recommendation system recommends items to the users that are relevant to the preferred features of other items.
+
+For example, if a user often searches or browses for ‘black dress’ on a shopping e-platform, a content-based recommendation system will recommend the user other dresses of the same colour.
+In this section we will compute the pairwise similarity score of all products based on their features and recommend products accordingly. The features are in the highlights column of our dataset.
+
+The similarity between two products can be calculated by measuring the cosine of the angle between two vectors in a matrix. To calculate it, the text strings (our highlights lists) is converted to word vectors in a matrix. Then, the angle between vectors is calculated and a score from 0 to 1 is generated. Values closer to 0 show low similarity and values closer to 1 show high similarity.
+
 1. Create products1 dataframe that includes only product-centric variables
-![image](https://github.com/user-attachments/assets/2f3a4001-bda0-4ebf-ab94-d6ff1cdee493)
+```html
+products1 = pd.DataFrame(product, columns=[
+    'product_id','product_name','highlights','primary_category', 'secondary_category', 'tertiary_category'])
+products1.head(5)
+products1.shape
+```
 2. Clean products1 using similar approach (drop_duplicates(), dropna(), reset_index())
 ![image](https://github.com/user-attachments/assets/f7aa7751-8c26-44bf-8d96-3571e12881e2)
 3. Create mapping for product_id  & products1 index to enable fast loopkup by product_id
@@ -48,7 +60,11 @@ This work utilizes the Sephora Products and Skincare Reviews datasets provided b
 
 
 ### Modelling
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
+<img width="190" alt="image" src="https://github.com/user-attachments/assets/bcc42eea-9849-42ce-a897-81995d9e0ace" />
+
+#### 1. Content-based Recommendation System¶
+
+
 
 ### Evaluation
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
