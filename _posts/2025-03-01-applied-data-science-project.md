@@ -5,14 +5,17 @@ title: "Product Recommendation System for Sephora Online Store"
 categories: ITD214
 ---
 ## Project Background
-This work is a part of a group project module from Nanyang Polytechnic Specialist Diploma in Business & Big Data Analytics.
+This work is a part of a group project module from Nanyang Polytechnic Singapore's *Specialist Diploma in Business & Big Data Analytics*.
 
-Project module  : ITD214 - Applied Data Science Project
-Group 5         : Applying Data Science to Improve/Optimize Skincare Business Model Through Customer Reviews
-Business Goal   : To enchance customer experience and business profitability by utilizing customer insights, product performance data, and market trends to drive product improvements, optimize marketing 
+#### Project Details
+- Project module  : ITD214 - Applied Data Science Project
+- Group 5         : Applying Data Science to Improve/Optimize Skincare Business Model Through Customer Reviews
+- Business Goal   : To enchance customer experience and business profitability by utilizing customer insights, product performance data, and market trends to drive product improvements, optimize marketing 
 strategies, and refine pricing decisions.
 
-This workbook is Part 3 of of the group project: **Product Recommendation System Development**, with the objective of developing a recommendation system to suggest products based on product similarity, customer purchasing patterns and reviews for a Sephora online store.
+This workbook is Part 3 of of the group project, titled **Product Recommendation System Development**, with the objective of developing a recommendation system to suggest products based on product similarity, customer purchasing patterns and reviews for a Sephora online store.
+
+![image](https://github.com/user-attachments/assets/b09ad82b-ccdc-4bb6-8f97-c261de77efb9)
 
 A recommendation system is an AI-driven tool that analyzes user behavior and preferences to suggest relevant products, services, or content. It uses techniques like collaborative filtering, content-based filtering, and hybrid approaches to provide personalized recommendations. These systems are widely used in e-commerce, streaming platforms, and online services to enhance user experience and engagement.
 
