@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/bbc1337f-f441-4630-9afc-8ce31f9c0fee)---
+---
 layout: post
 author: Chia Hoi BOK
 title: "Product Recommendation System for Sephora Online Store"
