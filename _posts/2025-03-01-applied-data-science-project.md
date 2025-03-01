@@ -82,7 +82,7 @@ This work utilizes the Sephora Products and Skincare Reviews datasets provided b
 # II. Work Accomplished
 
 ## Data Preparation
-#### Data Import & Understanding
+### Data Import & Understanding
 1. Importing necessary libraries
 ````html
 import pandas as pd
@@ -128,7 +128,7 @@ def data_summary(df, name):
 data_summary(product, "Product")
 data_summary(review, "Review")
 ````
-#### Data Preprocessing and Cleaning
+### Data Preprocessing and Cleaning
 4. Selecting only necessary columns for recommendation systems
 ````html
 # Select only necessary columns for recommendation system
@@ -162,7 +162,7 @@ data = data.drop_duplicates()
 data = data.reset_index(drop=True)
 ````
 
-#### Basic Exploratory Data Analysis (EDA) of data dataframe
+### Basic Exploratory Data Analysis (EDA) of data dataframe
 1. Checking simple statistics of numeric variables (ie. ratings). Rating : This is can be considered as categorical attribute with values of 1,2,3,4,5. The mean rating is 4.3 which means most of the users have given very good ratings (>4).
 ````
 data.describe().round(2).transpose()
@@ -204,7 +204,7 @@ Sample output of 'rating' dropdown selection:
 ![image](https://github.com/user-attachments/assets/789a3088-8924-4c15-9072-d23e56907356)
 
 
-#### Further Data preparation for *Content-Based Recommendation System*
+### Further Data preparation for *Content-Based Recommendation System*
   A content-based recommendation system recommends items to the users that are relevant to the preferred features of other items. For example, if a user often searches or browses for ‘black dress’ on a shopping e-platform, a content-based recommendation system will recommend the user other dresses of the same colour.
 In this section we will compute the pairwise similarity score of all products based on their features and recommend products accordingly. The features are in the highlights column of our dataset.
 
@@ -264,7 +264,7 @@ tfidf_df.head()
 cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 ````
 
-#### Further Data preparation for *Collaborative Filtering Recommendation System*
+### Further Data preparation for *Collaborative Filtering Recommendation System*
   A collaborative recommendation system predicts user preferences by leveraging past interactions and preferences of similar users, typically through collaborative filtering techniques such as user-based or item-based approaches. These systems focus on identifying patterns in user behavior to suggest items, relying on the assumption that users who agreed in the past will agree in the future (Ricci, F., Rokach, L., & Shapira, B., 2015).
 
 Example: If User A and User B have rated many movies similarly, and User B gives a high rating to a movie that User A hasn’t seen, we can recommend that movie to User A. Since User B rated Movie 3 as 5, we can predict that User A might like Movie 3 as well.
@@ -334,7 +334,7 @@ surprise_data = Dataset.load_from_df(filtered_data[['author_id', 'product_id', '
 trainset, testset = train_test_split(surprise_data, test_size=0.2,random_state=5)
 ````
 
-# Modelling
+# III. Modelling
 
 ## 1. Content-based Recommendation System
 A function get_recommendation() is created to call the top 5 similar products to the user-input product_id.
@@ -368,7 +368,7 @@ Example of inputting a fragrance product (P473671), the top 5 recommendations ar
 
 ## 2. Collaborative Filtering Recommendation System
 
-#### 2.1 SVD Matrix Factorization Algorithm
+### 2.1 SVD Matrix Factorization Algorithm
 Singular Value Decomposition (SVD):
 - A matrix factorization technique that decomposes a given matrix into a set of matrices.
 - Reduces the dimensionality of user-item interaction matrices and generates latent factors for both users and items that can then be used to predict user preferences for items and provide personalized recommendations.
@@ -390,8 +390,8 @@ The aobve returns a list of prediction objects used by the surprise library to s
 - est (float) The estimated rating r_ui
 - details (dict) – Stores additional details about the prediction that might be useful for later analsis.
 
-# Model Evaluation 
-#### Evaluation of untuned SVD model:
+# IV. Model Evaluation 
+### Evaluation of untuned SVD model:
 ````html
 # Evaluate model accuracy by built-in RMSE Metric in SURPRISE
 mse = accuracy.mse(predictions)
@@ -419,7 +419,7 @@ print(svd_1)
 3. FCP (Fraction of Concordant Pairs): Measures how well the model ranks items. Higher FCP is better (closer to 1 means better ranking).
 - Mean FCP = 0.5140 (in 51% of cases, the model correctly ranked higher-rated items above lower-rated ones). FCP is slightly better than random (0.5), but there's room for improvement.
 
-#### Untuned SVD Model Application
+### Untuned SVD Model Application
 Defining a function to recommend top n products based on user input product_id:
 ````
 # Function to Recommend Top-N Products for a User; N = 5
@@ -462,7 +462,7 @@ Sample outcome of user input '5182718480':
 
 <img width="566" alt="image" src="https://github.com/user-attachments/assets/945f78d1-942b-4444-9cc4-c368d698bbce" />
 
-#### SVD Model Hyperparameter Tuning
+### SVD Model Hyperparameter Tuning
 We will now attempt to do hyperparameter tuning for the SVD model to find out the optimal parameter values for the model. We will be comparing the performance between GridSearchCV and RandomizedSearchCV methods and select one that will produce lower RMSE.
 1. Importing built-in surprise functions
 ````html
@@ -557,7 +557,7 @@ Output:
 
 <img width="557" alt="image" src="https://github.com/user-attachments/assets/b1562bda-d9df-4aca-932e-7b4b772adc54" />
 
-#### Tuned-SVD Model Application
+### Tuned-SVD Model Application
 A new function is defined to get the top 5 recommendation products, and an example output is shown using author_id '5182718480'.
 ````html
 # Function to Recommend Top-N Products for a User; N = 5
@@ -624,7 +624,7 @@ plt.show()
 
 <img width="573" alt="image" src="https://github.com/user-attachments/assets/79680647-cb30-4ab6-82cf-b1a46f7f33e0" />
 
-#### Other Built-in Algorithms in SURPRISE Library
+### Other Built-in Algorithms in SURPRISE Library
   The surprise library also offers other algorithms that supports recommendation system models. A few of them are explored and compared with in terms of RMSE performance here.
 
 1. Importing other algorithms and defining function to iterate cross validation on the dataset  
@@ -684,7 +684,7 @@ Outcome is shown below. It can be seen that SVDpp and SVD models have the least 
 <img width="529" alt="image" src="https://github.com/user-attachments/assets/8fef16a8-fcac-44d1-8e82-18690f9375c3" />
 
 
-# Recommendation and Analysis
+# V. Recommendation and Analysis
 
   Recommender systems are algorithms aimed at suggesting relevant items to users (items being movies to watch, text to read, products to buy or anything else depending on industries). Recommender systems are really critical in some industries as they can generate a huge amount of income when they are efficient or also be a way to stand out significantly from competitors.
 
@@ -752,14 +752,14 @@ user_id = 5442418082  # Example user
 print("Top 5 Hybrid Recommendations:", get_hybrid_recommendations(user_id, n=5))
 ````
 
-# AI Ethics Concerns and Risk Mitigation
+# VI. AI Ethics Concerns and Risk Mitigation
   Since the recommendation systems are widely used in user-interface platforms online, it has the risks of showing **biasness** when providing recommendations in the model. For example, If the system favors a particular gender, ethnicity, or skin type, it could lead to discriminatory recommendations.
 
 This can be mitigated through privacy-first policies, fairness-aware algorithms, transparency, and user control. Ensuring an inclusive, unbiased, and accountable recommendation engine will enhance trust and user satisfaction. When training the model, we need to ensure there is sufficient diverse data representation, as well as excluding the protected or discriminatory features. For instance, user data as gender and ethnicity should not be used in the model if it irrelevant for generating generating recommendations.
 
   One other major AI ethic is respecting user **data privacy**. In commercial e-platforms such as this, vast amounts of user data is stored. For example, collaborative filtering relies on user purchase history, clicks, and reviews. Storing and processing such data raises concerns about how much personal information is being collected. Hence, it is our legal and moral obligation to inform users of how you collect, store, access and use their data for the AI system. The data acquisition method must meet privacy regulations such as the General Data Protection Regulation (GDPR) and the Personal Data Protection Act (PDPA). 
 
-# Source Codes, Datasets, and References
+# VII. Source Codes, Datasets, and References
 - Datasource files are too large to upload. Datasource (kaggle): https://www.kaggle.com/datasets/nadyinky/sephora-products-and-skincare-reviews/data
 - Github repo: https://github.com/bok-97/itd214_project_data
 
@@ -768,6 +768,5 @@ This can be mitigated through privacy-first policies, fairness-aware algorithms,
 2. https://www.kaggle.com/code/rangarajansaranathan/collaborative-filtering-based-recommender-system#b.-Collaborative-Filtering-Recommender-Model-using-SURPRISE-Library
 3. https://joss.theoj.org/papers/10.21105/joss.02174.pdf
 4. https://surpriselib.com/
-![image](https://github.com/user-attachments/assets/cf541561-7a31-4040-b743-1fd424af55bd)
 
 
