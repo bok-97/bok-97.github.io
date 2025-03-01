@@ -225,7 +225,33 @@ The aobve returns a list of prediction objects used by the surprise library to s
 - details (dict) – Stores additional details about the prediction that might be useful for later analsis.
 
 ### Evaluation 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
+Evaluation of untuned SVD model:
+````html
+# Evaluate model accuracy by built-in RMSE Metric in SURPRISE
+mse = accuracy.mse(predictions)
+rmse = accuracy.rmse(predictions)
+````
+<img width="486" alt="image" src="https://github.com/user-attachments/assets/6cb7c643-ad01-4257-b316-d1204a747281" />
+
+We can use a more rigorous cross_validation evaluation on the untuned SVD model.
+```html
+def validate_model(model, data):
+    results = cross_validate(model, data, measures=['RMSE', 'MAE', 'FCP'], cv=10, verbose=True) # cross-validate 10 folds
+    return pd.DataFrame.from_dict(results).mean(axis=0)
+
+svd_1 = validate_model(model, surprise_data)
+print(svd_1)
+````
+<img width="559" alt="image" src="https://github.com/user-attachments/assets/d2cbbd55-37e4-46a6-8698-9df1c4d2dd6f" />
+1. RMSE (Root Mean Square Error): Measures how far the predicted ratings are from actual ratings. Lower RMSE is better (closer to zero means better accuracy).
+- RMSE = 0.9192 (model's average predicted ratings are about 0.95 stars away from actual ratings)
+2. MAE (Mean Absolute Error): Measures the average absolute difference between predicted and actual ratings. Similary, lower is better. MAE does not penalize large errors as much as RMSE does.
+- Mean MAE = 0.6598 (predicted ratings are on average off by 0.66 stars)
+3. FCP (Fraction of Concordant Pairs): Measures how well the model ranks items. Higher FCP is better (closer to 1 means better ranking).
+- Mean FCP = 0.5140 (in 51% of cases, the model correctly ranked higher-rated items above lower-rated ones). FCP is slightly better than random (0.5), but there's room for improvement.
+
+### SVD Model Hyperparameter Tuning
+
 
 ## Recommendation and Analysis
 
@@ -301,5 +327,8 @@ Discuss the potential data science ethics issues (privacy, fairness, accuracy, a
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
 
 ## Source Codes and Datasets
-Github repo: https://github.com/bok-97/itd214_project_data
+Datasource files are too large to upload. 
 Datasource (kaggle): https://www.kaggle.com/datasets/nadyinky/sephora-products-and-skincare-reviews/data
+
+Github repo: https://github.com/bok-97/itd214_project_data
+
