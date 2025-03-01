@@ -97,15 +97,56 @@ cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 ````
 
 #### Further Data preparation for Collaborative Filtering Recommendation System
+A collaborative recommendation system predicts user preferences by leveraging past interactions and preferences of similar users, typically through collaborative filtering techniques such as user-based or item-based approaches. These systems focus on identifying patterns in user behavior to suggest items, relying on the assumption that users who agreed in the past will agree in the future (Ricci, F., Rokach, L., & Shapira, B., 2015).
+
+Example: If User A and User B have rated many movies similarly, and User B gives a high rating to a movie that User A hasn’t seen, we can recommend that movie to User A. Since User B rated Movie 3 as 5, we can predict that User A might like Movie 3 as well.
+User              | Movie 1           | Movie 2           | Movie 3          | Movie 4
+----------------- | ----------------- | ----------------- | -----------------| -----------------
+A                 | 5                 | 4                 | **?**            | 2
+B                 | 5                 | 4                 | 5                | 3
+
+Collaborative filtering systems work in 5 simple steps:
+1. Collect User-Item Interactions (Load Data) – Gather data on user behavior, such as ratings, purchases, or clicks on items.
+2. Build a User-Item Matrix – Create a matrix where rows represent users, columns represent items, and values show interactions (e.g., ratings).
+3. Find Similarities – Identify similar users (User-Based CF) or similar items (Item-Based CF) based on their interaction patterns.
+4. Predict Ratings/Preferences – Estimate a user’s interest in an item by analyzing ratings from similar users or items.
+5. Recommend Top Items – Suggest the highest predicted items that the user hasn’t interacted with yet.
 
 
 
 ### Modelling
 <img width="190" alt="image" src="https://github.com/user-attachments/assets/bcc42eea-9849-42ce-a897-81995d9e0ace" />
 
-#### 1. Content-based Recommendation System¶
+#### 1. Content-based Recommendation System
+A function get_recommendation() is created to call the top 5 similar products to the user-input product_id.
+````html
+# Recommendation Function
+def get_recommendations(product_id, cosine_sim=cosine_sim):
+    if product_id not in indices:
+        return f"Product ID {product_id} not found."
+    idx = indices[product_id]
+    product_name = products1.loc[products1['product_id'] == product_id, 'product_name'].values[0]
 
+    sim_scores = list(enumerate(cosine_sim[idx]))
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    sim_scores = sim_scores[1:6]  # Top 5 similar products
+    product_indices = [i[0] for i in sim_scores]
+    recommendations = products1.iloc[product_indices][['product_id', 'product_name']]
+    print(f"Product Selected: {product_name} (ID: {product_id})\n")
+    print("Top 5 Recommended Products:")
+    
+    return recommendations
 
+# Prompt user to input a product code
+user_product_id = input("Please enter the product code: ")
+
+# Call the recommendation function with user input
+print(get_recommendations(user_product_id))
+````
+Example of inputting a fragrance product (P473671), the top 5 recommendations are also fragrance products:
+<img width="323" alt="image" src="https://github.com/user-attachments/assets/51971efc-c46b-4d20-921c-de1859722cc7" />
+
+#### 2. Collaborative Filtering Recommendation System
 
 ### Evaluation
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
