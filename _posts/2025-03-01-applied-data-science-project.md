@@ -23,6 +23,8 @@ In this work, we will be developing two types of recommendation systems:
 1. Content-Based Recommender System; recommend based on product similarity/cosine-similarity
 2. Collaborative Filtering Recommender System; recommend based on user preference/rating hisotry
 
+<img width="190" alt="image" src="https://github.com/user-attachments/assets/bcc42eea-9849-42ce-a897-81995d9e0ace" />
+
 ### About Dataset
 This work utilizes the Sephora Products and Skincare Reviews datasets provided by Nady Inky on Kaggle, it contains:
 - information about all beauty products (over 8,000) from the Sephora online store, including product and brand names, prices, ingredients, ratings, and all features.
@@ -167,7 +169,6 @@ trainset, testset = train_test_split(surprise_data, test_size=0.2,random_state=5
 ````
 
 ### Modelling
-<img width="190" alt="image" src="https://github.com/user-attachments/assets/bcc42eea-9849-42ce-a897-81995d9e0ace" />
 
 #### 1. Content-based Recommendation System
 A function get_recommendation() is created to call the top 5 similar products to the user-input product_id.
@@ -201,13 +202,98 @@ Example of inputting a fragrance product (P473671), the top 5 recommendations ar
 
 #### 2. Collaborative Filtering Recommendation System
 
-### Evaluation
+##### 2.1 SVD Matrix Factorization Algorithm
+Singular Value Decomposition (SVD):
+- A matrix factorization technique that decomposes a given matrix into a set of matrices.
+- Reduces the dimensionality of user-item interaction matrices and generates latent factors for both users and items that can then be used to predict user preferences for items and provide personalized recommendations.
+- SVD is known for its accuracy in collaborative filtering-based recommendation systems and has been popularized by its use in the Netflix Prize competition.
+
+1. Train a Collaborative Filtering Model (SVD, Untuned)
+````html
+model = SVD()
+model.fit(trainset)
+````
+2. Make Predictions on the Test Set
+````html
+predictions = model.test(testset)
+````
+The aobve returns a list of prediction objects used by the surprise library to store results:
+- uid – (inner) user id.
+- iid – (inner) item id
+- r_ui (float) - the true rating r_ui
+- est (float) The estimated rating r_ui
+- details (dict) – Stores additional details about the prediction that might be useful for later analsis.
+
+### Evaluation 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
 
 ## Recommendation and Analysis
-Explain the analysis and recommendations
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum neque eget nunc mattis eu sollicitudin enim tincidunt. Vestibulum lacus tortor, ultricies id dignissim ac, bibendum in velit. Proin convallis mi ac felis pharetra aliquam. Curabitur dignissim accumsan rutrum. In arcu magna, aliquet vel pretium et, molestie et arcu. Mauris lobortis nulla et felis ullamcorper bibendum. Phasellus et hendrerit mauris. Proin eget nibh a massa vestibulum pretium. Suspendisse eu nisl a ante aliquet bibendum quis a nunc. Praesent varius interdum vehicula. Aenean risus libero, placerat at vestibulum eget, ultricies eu enim. Praesent nulla tortor, malesuada adipiscing adipiscing sollicitudin, adipiscing eget est.
+Recommender systems are algorithms aimed at suggesting relevant items to users (items being movies to watch, text to read, products to buy or anything else depending on industries). Recommender systems are really critical in some industries as they can generate a huge amount of income when they are efficient or also be a way to stand out significantly from competitors.
+
+We have achieved the business objective of building a recommendation system for users of Sephora products.
+We have used 2 different types here:
+
+1. Content-Based Recommender System; recommend based on product similarity/cosine-similarity
+2. Collaborative Filtering Recommender System; recommend based on user preference/rating hisotry
+The best model used recommended is **SVD-based** algorithm where it had acheived the lowest RMSE when compared to other SURPRISE algorithms (NMF, CoClustering, BaselineOnly).
+
+Model optimzation was also attempted by **tuning the hyperparameters of SVD through GridSearchCV** before applying fitting the optimized parameters (epochs, learning rates, etc) to the dataset for training and testing.
+
+### Recommendation for Further Optimization
+Surprise models rely on the training data. If a user was removed before training, the model never saw them, so it does not have their preferences and no past ratings to base predictions on. This is known as Cold Start Problem (New or Unseen Users).
+
+1. Keep Low-Activity Users in Training Instead of removing them completely, keep them but apply different weights (e.g., give more weight to active users).
+2. Use a "Default" or Hybrid Approach If a user wasn’t in training, fall back on item popularity-based recommendations.
+3. Implement a Different Model for Cold Start Use content-based filtering (e.g., recommend items similar to what they view) until enough reviews exist.
+
+<img width="307" alt="image" src="https://github.com/user-attachments/assets/ac1bc278-0099-4e18-945a-86ea8c134687" />
+
+#### Hybrid Model (Combining Collaborative Filtering Model with Content-Based System)
+````html
+# Compute Product Similarity Based on Features
+feature_columns = ['skin_tone', 'eye_color', 'skin_type', 'hair_color']
+df_encoded = pd.get_dummies(filtered_data[feature_columns])  # One-hot encode categorical features
+
+product_features = df_encoded.groupby(filtered_data['product_id']).mean()  # Aggregate features per product
+product_similarity = cosine_similarity(product_features)  # Compute cosine similarity
+
+# Convert to DataFrame for easy lookup
+product_sim_df = pd.DataFrame(product_similarity, index=product_features.index, columns=product_features.index)
+
+# Function to Recommend Top-N Products (Hybrid)
+def get_hybrid_recommendations(user_id, n=5):
+    """Hybrid Recommendation: Collaborative Filtering + Content Features"""
+    
+    # Get all unique product IDs
+    all_product_ids = filtered_data['product_id'].unique()
+    
+    # Get products the user has already rated
+    rated_products = filtered_data[filtered_data['author_id'] == user_id]['product_id'].values
+    unrated_products = [pid for pid in all_product_ids if pid not in rated_products]
+    
+    # Predict ratings for unrated products using SVD
+    predictions = [model.predict(user_id, pid) for pid in unrated_products]
+    predictions.sort(key=lambda x: x.est, reverse=True)
+    
+    # Select top-N recommended products
+    top_n_products = [pred.iid for pred in predictions[:n]]
+    
+    # Enhance with feature-based similarity
+    hybrid_scores = []
+    for pid in top_n_products:
+        similar_products = product_sim_df[pid].sort_values(ascending=False).index[1:3]  # Get 2 most similar products
+        hybrid_scores.extend(similar_products)
+    
+    # Return final recommendations
+    final_recommendations = list(set(top_n_products + hybrid_scores))[:n]
+    
+    return final_recommendations
+
+# Example Usage: Recommend top 5 products for a user
+user_id = 5442418082  # Example user
+print("Top 5 Hybrid Recommendations:", get_hybrid_recommendations(user_id, n=5))
+````
 
 ## AI Ethics
 Discuss the potential data science ethics issues (privacy, fairness, accuracy, accountability, transparency) in your project. 
