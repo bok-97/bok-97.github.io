@@ -253,6 +253,9 @@ print(svd_1)
 3. FCP (Fraction of Concordant Pairs): Measures how well the model ranks items. Higher FCP is better (closer to 1 means better ranking).
 - Mean FCP = 0.5140 (in 51% of cases, the model correctly ranked higher-rated items above lower-rated ones). FCP is slightly better than random (0.5), but there's room for improvement.
 
+#### Untuned SVD Model Application
+
+
 ### SVD Model Hyperparameter Tuning
 We will now attempt to do hyperparameter tuning for the SVD model to find out the optimal parameter values for the model. We will be comparing the performance between GridSearchCV and RandomizedSearchCV methods and select one that will produce lower RMSE.
 1. Importing built-in surprise functions
@@ -312,6 +315,7 @@ for param, value in best_params.items():
     print(f"{param}: {value}")
 ````
 The output from the above is:
+
 <img width="353" alt="image" src="https://github.com/user-attachments/assets/bd96c2f3-087d-4b8c-b202-30cb4b3b8018" />
 
 5. Fine-tuning SVD model with obtained parameter values and fitting it
@@ -344,6 +348,134 @@ final_rmse = accuracy.rmse(predictions)
 print(f"Final RMSE after retraining: {final_rmse}")
 ````
 Output:
+
+<img width="557" alt="image" src="https://github.com/user-attachments/assets/b1562bda-d9df-4aca-932e-7b4b772adc54" />
+
+#### Tuned-SVD Model Application
+A new function is defined to get the top 5 recommendation products, and an example output is shown using author_id '5182718480'.
+````html
+# Function to Recommend Top-N Products for a User; N = 5
+def get_top_n_recommendations(model, user_id, n=5):
+    """Recommend top N products for a given user."""
+    # Get all product IDs
+    all_product_ids = filtered_data['product_id'].unique()
+    
+    # Remove products user has already rated
+    rated_products = filtered_data[filtered_data['author_id'] == user_id]['product_id'].values
+    unrated_products = [pid for pid in all_product_ids if pid not in rated_products]
+    
+    # Predict ratings for unrated products
+    predictions = [final_model.predict(user_id, pid) for pid in unrated_products]
+    
+    # Sort by predicted rating
+    predictions.sort(key=lambda x: x.est, reverse=True)
+    
+    # Get top-N recommendations
+    top_n = predictions[:n]
+
+    # Convert to DataFrame for table output
+    df = pd.DataFrame([(pred.iid, pred.est) for pred in top_n], columns=["Product ID", "Predicted Rating"])
+    df.index += 1  # Start index from 1 for better readability
+    
+    return [(pred.iid, pred.est) for pred in top_n]
+
+# Take user input for user_id
+user_id = input("Enter User ID: ")
+
+
+try:
+    user_id = int(user_id)  # Convert input to integer if needed
+    recommendations_df = get_top_n_recommendations(model, user_id, n=5)
+    print(recommendations_df)  # Display recommendations in table format
+except ValueError:
+    print("Invalid User ID. Please enter a numeric value.")
+````
+
+<img width="571" alt="image" src="https://github.com/user-attachments/assets/f628350c-4d0a-4401-962c-0469a059eb2f" />
+
+We find out that, for the same author_id, the same top 5 products were recommended. Plotting a side-by-side bar chart of the metric scores comparison between the untuned and tuned SVD model, it explains why both models are giving the same outcome.
+````html
+import pandas as pd
+import matplotlib.pyplot as plt
+results_df = pd.DataFrame({
+    'SVD without tuning': [svd_1['test_rmse'], svd_1['test_mae'], svd_1['test_fcp']],
+    'SVD after tuning': [cv_results['test_rmse'], cv_results['test_mae'], cv_results['test_fcp']]
+}, index=['RMSE', 'MAE', 'FCP'])
+
+print("Comparison DataFrame:")
+print(results_df)
+
+# Plotting the comparison chart (side-by-side bar chart)
+ax = results_df.plot(kind='bar', figsize=(10, 6))
+ax.set_title('Comparison of SVD Models (Tuned vs. Untuned)')
+ax.set_ylabel('Metric Value')
+ax.set_xlabel('Evaluation Metrics')
+plt.xticks(rotation=0)
+plt.legend(title='Model')
+plt.tight_layout()
+plt.show()
+````
+
+<img width="573" alt="image" src="https://github.com/user-attachments/assets/79680647-cb30-4ab6-82cf-b1a46f7f33e0" />
+
+#### Other Built-in Algorithms in SURPRISE Library
+The surprise library also offers other algorithms that supports recommendation system models. A few of them are explored and compared with in terms of RMSE performance here.
+
+1. Importing other algorithms and defining function to iterate cross validation on the dataset  
+````html
+from surprise import NMF
+from surprise import SVDpp
+from surprise import KNNWithZScore
+from surprise import BaselineOnly
+from surprise import CoClustering
+
+benchmark = []
+# Iterate over all algorithms
+for algorithm in [NMF(), SVD(), SVDpp(), BaselineOnly(), CoClustering()]:
+    # Perform cross validation
+    results = cross_validate(algorithm, surprise_data, measures=['RMSE'], cv=5, verbose=False, n_jobs=1)
+    
+    # Get results & append algorithm name
+    tmp = pd.DataFrame.from_dict(results).mean(axis=0)
+    tmp = pd.concat([tmp, pd.Series([str(algorithm).split(' ')[0].split('.')[-1]], index=['Algorithm'])])
+    benchmark.append(tmp)
+    
+comparison = pd.DataFrame(benchmark).set_index('Algorithm').sort_values('test_rmse', ascending=True)
+````
+2. Plotting the comparison results
+````html
+# Set the figure size
+fig, ax = plt.subplots(figsize=(12, 6))
+
+# Set up the position of the bars
+bar_width = 0.25
+index = np.arange(len(comparison))
+
+# Plot the bars for each metric
+bar1 = ax.bar(index - bar_width, comparison['test_rmse'], bar_width, label='test_rmse', color='skyblue')
+bar2 = ax.bar(index, comparison['fit_time'], bar_width, label='fit_time', color='orange')
+bar3 = ax.bar(index + bar_width, comparison['test_time'], bar_width, label='test_time', color='lightgreen')
+
+# Set labels and title
+ax.set_xlabel('Algorithm')
+ax.set_ylabel('Values')
+ax.set_title('Comparison of Algorithms by Metrics')
+ax.set_xticks(index)
+ax.set_xticklabels(comparison.index, rotation=45)
+
+# Add a legend
+ax.legend()
+
+# Tight layout for better display
+plt.tight_layout()
+
+# Show the plot
+plt.show()
+````
+
+Outcome is shown below. It can be seen that SVDpp and SVD models have the least RMSE values and is the optimal model used for this work.
+
+<img width="529" alt="image" src="https://github.com/user-attachments/assets/8fef16a8-fcac-44d1-8e82-18690f9375c3" />
 
 
 ## Recommendation and Analysis
